@@ -1,0 +1,71 @@
+{{- if .Values.ingress.enabled }}
+{{- if not .Values.ingress.host }}
+{{- fail "ingress.host must be set when ingress.enabled=true" }}
+{{- end }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "devpulse.fullname" . }}
+  labels:
+    {{- include "devpulse.labels" . | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.ingress.className }}
+  ingressClassName: {{ .Values.ingress.className }}
+  {{- end }}
+  {{- if .Values.ingress.tls.enabled }}
+  tls:
+    - hosts:
+        - {{ .Values.ingress.host | quote }}
+      {{- if .Values.ingress.tls.secretName }}
+      secretName: {{ .Values.ingress.tls.secretName }}
+      {{- end }}
+  {{- end }}
+  rules:
+    - host: {{ .Values.ingress.host | quote }}
+      http:
+        paths:
+          # Backend API routes
+          - path: /v1
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "devpulse.backend.fullname" . }}
+                port:
+                  number: 8000
+          # Backend auth routes (GitHub OAuth flow)
+          - path: /auth
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "devpulse.backend.fullname" . }}
+                port:
+                  number: 8000
+          # Backend webhook endpoint
+          - path: /webhook
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "devpulse.backend.fullname" . }}
+                port:
+                  number: 8000
+          # Backend health probe (optional public exposure)
+          - path: /health
+            pathType: Exact
+            backend:
+              service:
+                name: {{ include "devpulse.backend.fullname" . }}
+                port:
+                  number: 8000
+          # Frontend SPA — catch-all
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "devpulse.frontend.fullname" . }}
+                port:
+                  number: 80
+{{- end }}

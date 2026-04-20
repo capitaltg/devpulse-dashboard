@@ -1,0 +1,59 @@
+{
+  "zen": "Approachable is better than simple.",
+  "hook_id": 597782716,
+  "hook": {
+    "type": "Organization",
+    "id": 597782716,
+    "name": "web",
+    "active": true,
+    "events": [
+      "*"
+    ],
+    "config": {
+      "content_type": "json",
+      "insecure_ssl": "0",
+      "secret": "********",
+      "url": "https://ghdashboard.capitaltg.com/webhook?workspace_id=second"
+    },
+    "updated_at": "2026-02-24T16:28:14Z",
+    "created_at": "2026-02-24T16:28:14Z",
+    "url": "https://api.github.com/orgs/t4ngtech/hooks/597782716",
+    "ping_url": "https://api.github.com/orgs/t4ngtech/hooks/597782716/pings",
+    "deliveries_url": "https://api.github.com/orgs/t4ngtech/hooks/597782716/deliveries"
+  },
+  "organization": {
+    "login": "t4ngtech",
+    "id": 67606579,
+    "node_id": "MDEyOk9yZ2FuaXphdGlvbjY3NjA2NTc5",
+    "url": "https://api.github.com/orgs/t4ngtech",
+    "repos_url": "https://api.github.com/orgs/t4ngtech/repos",
+    "events_url": "https://api.github.com/orgs/t4ngtech/events",
+    "hooks_url": "https://api.github.com/orgs/t4ngtech/hooks",
+    "issues_url": "https://api.github.com/orgs/t4ngtech/issues",
+    "members_url": "https://api.github.com/orgs/t4ngtech/members{/member}",
+    "public_members_url": "https://api.github.com/orgs/t4ngtech/public_members{/member}",
+    "avatar_url": "https://avatars.githubusercontent.com/u/67606579?v=4",
+    "description": null
+  },
+  "sender": {
+    "login": "tlazar",
+    "id": 9523540,
+    "node_id": "MDQ6VXNlcjk1MjM1NDA=",
+    "avatar_url": "https://avatars.githubusercontent.com/u/9523540?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/tlazar",
+    "html_url": "https://github.com/tlazar",
+    "followers_url": "https://api.github.com/users/tlazar/followers",
+    "following_url": "https://api.github.com/users/tlazar/following{/other_user}",
+    "gists_url": "https://api.github.com/users/tlazar/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/tlazar/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/tlazar/subscriptions",
+    "organizations_url": "https://api.github.com/users/tlazar/orgs",
+    "repos_url": "https://api.github.com/users/tlazar/repos",
+    "events_url": "https://api.github.com/users/tlazar/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/tlazar/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  }
+}

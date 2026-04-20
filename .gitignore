@@ -1,0 +1,12 @@
+.DS_Store
+.env
+.env.local
+.cache
+tsconfig.tsbuildinfo
+node_modules
+backend/dist
+backend/data
+frontend/.next
+server/.venv
+__pycache__/
+.gstack/

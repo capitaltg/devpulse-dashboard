@@ -1,0 +1,12 @@
+apiVersion: v2
+name: devpulse
+description: DevPulse — open-source GitHub telemetry dashboard (Kubernetes)
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+home: https://github.com/capitaltg/devpulse-dashboard
+sources:
+  - https://github.com/capitaltg/devpulse-dashboard
+maintainers:
+  - name: Capital Technology Group
+    url: https://www.capitaltg.com/labs

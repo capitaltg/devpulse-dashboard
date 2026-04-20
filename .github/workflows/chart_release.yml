@@ -1,0 +1,43 @@
+name: Publish Helm Chart to GHCR
+
+on:
+  push:
+    tags:
+      - "chart-v*.*.*"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Package only, don't push"
+        type: boolean
+        default: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v5
+        with:
+          version: v3.20.1
+
+      - name: Log in to GHCR
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.dry_run != true }}
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      - name: Package chart
+        id: package
+        run: |
+          helm dependency update charts/devpulse
+          helm package charts/devpulse
+          tgz=$(ls devpulse-*.tgz)
+          echo "tgz=$tgz" >> "$GITHUB_OUTPUT"
+          echo "Packaged: $tgz"
+
+      - name: Push chart to GHCR
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.dry_run != true }}
+        run: helm push "${{ steps.package.outputs.tgz }}" oci://ghcr.io/capitaltg/charts

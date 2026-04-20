@@ -1,0 +1,120 @@
+# -- DevPulse Helm chart values -----------------------------------------------
+
+nameOverride: ""
+fullnameOverride: ""
+
+# -- Image registry, tags, and pull policy ------------------------------------
+image:
+  registry: ghcr.io/capitaltg
+  # Pull on every pod start because the default chart's image tag (derived
+  # from Chart.appVersion as `v<appVersion>`) is immutable — but `latest`
+  # and other floating tags overridden by users must not be cached. When you
+  # pin image.tag to a sha-<git-sha> value, IfNotPresent is safe.
+  pullPolicy: Always
+  # Tag applied to both frontend and backend. Leave empty to use the chart's
+  # appVersion (e.g. "v0.1.0") — keeps chart and image versions locked.
+  # Override with "latest" for floating, or "sha-<git-sha>" for reproducible.
+  tag: ""
+
+frontend:
+  image:
+    # Full repository path: <image.registry>/<frontend.image.repository>
+    repository: devpulse-dashboard-frontend
+  replicaCount: 1
+  resources: {}
+  # Additional env injected into the frontend container (rarely needed — the
+  # frontend fetches its config from the backend at /v1/config).
+  extraEnv: []
+  service:
+    # Annotations applied to the frontend Service. Useful on AWS ALB for
+    # per-target-group customization, e.g.:
+    #   alb.ingress.kubernetes.io/healthcheck-path: /
+    annotations: {}
+
+backend:
+  image:
+    repository: devpulse-dashboard-backend
+  replicaCount: 1
+  resources: {}
+  extraEnv: []
+  service:
+    # Annotations applied to the backend Service. On AWS ALB, set
+    # alb.ingress.kubernetes.io/healthcheck-path: /health here to stop the
+    # ALB probing the backend on `/` (which 404s).
+    annotations: {}
+
+# -- Authentication -----------------------------------------------------------
+# See docs/getting-started.md for provider setup.
+auth:
+  # One of: github | oidc
+  provider: ""
+  # Base URL the backend redirects the browser to after sign-in. Required for
+  # AUTH_PROVIDER=github. When ingress is enabled and its host is set, this
+  # defaults to https://<ingress.host>.
+  frontendBaseUrl: ""
+
+  github:
+    clientId: ""
+    # Set via secret.values.githubClientSecret or existingSecret.
+  oidc:
+    issuer: ""
+    clientId: ""
+    scope: "openid email profile"
+
+# -- Secrets ------------------------------------------------------------------
+# Two mutually-exclusive ways to provide secrets:
+#   1. Set values below — chart creates a Secret named <release>-env.
+#   2. Set existingSecret to a pre-created Secret's name; see the keys it must
+#      contain in the reference below.
+secret:
+  # If set, chart skips creating a Secret and references this one instead.
+  # Must contain keys: ENCRYPTION_KEY, AUTH_JWT_SECRET, and provider-specific
+  # keys (GITHUB_OAUTH_CLIENT_SECRET for github; none extra for oidc). When
+  # postgresql.enabled=false, it must also contain DATABASE_URL.
+  existingSecret: ""
+  values:
+    # Fernet-compatible 32-byte URL-safe base64 string. Generate with:
+    #   python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+    encryptionKey: ""
+    # HS256 secret used to sign session JWTs in GitHub mode. 32+ bytes.
+    #   python -c "import secrets; print(secrets.token_urlsafe(48))"
+    authJwtSecret: ""
+    # GitHub OAuth client secret (AUTH_PROVIDER=github only).
+    githubClientSecret: ""
+
+# -- Database -----------------------------------------------------------------
+# DevPulse requires a Postgres database. The chart does not bundle one — bring
+# your own (RDS, Cloud SQL, CloudNativePG operator, or a plain Deployment).
+# Either set database.url here, or leave it empty and provide it via
+# secret.existingSecret with key DATABASE_URL.
+database:
+  # postgresql://user:pass@host:5432/db
+  url: ""
+
+# -- Ingress ------------------------------------------------------------------
+# Routes / to the frontend and /v1/* + /auth/* to the backend on a single host,
+# which keeps cookies same-origin (required for GitHub OAuth CSRF).
+ingress:
+  enabled: false
+  className: ""
+  host: ""
+  annotations: {}
+  tls:
+    enabled: false
+    # If enabled and secretName unset, cert-manager/etc. manages the cert.
+    secretName: ""
+
+service:
+  type: ClusterIP
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+podSecurityContext: {}
+securityContext: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}

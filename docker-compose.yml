@@ -1,0 +1,72 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: devpulse
+      POSTGRES_PASSWORD: devpulse
+      POSTGRES_DB: devpulse
+    ports:
+      # Override POSTGRES_PORT in .env if 5432 is already in use on your host.
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U devpulse"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  services:
+    build:
+      context: ./services
+    command:
+      - uvicorn
+      - app.main:app
+      - --host
+      - 0.0.0.0
+      - --reload
+      - --reload-dir
+      - /app/app
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://devpulse:devpulse@postgres:5432/devpulse
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:?Create .env from .env.example first}
+      AUTH_PROVIDER: ${AUTH_PROVIDER:-}
+      FRONTEND_BASE_URL: ${FRONTEND_BASE_URL:-http://localhost:3000}
+      # OIDC mode
+      OIDC_ISSUER: ${OIDC_ISSUER:-}
+      OIDC_CLIENT_ID: ${OIDC_CLIENT_ID:-}
+      OIDC_SCOPE: ${OIDC_SCOPE:-}
+      # GitHub mode
+      GITHUB_OAUTH_CLIENT_ID: ${GITHUB_OAUTH_CLIENT_ID:-}
+      GITHUB_OAUTH_CLIENT_SECRET: ${GITHUB_OAUTH_CLIENT_SECRET:-}
+      AUTH_JWT_SECRET: ${AUTH_JWT_SECRET:-}
+      GITHUB_URL: ${GITHUB_URL:-}
+    ports:
+      - "${API_PORT:-8000}:8000"
+    volumes:
+      - ./services/app:/app/app
+      - ./services/alembic:/app/alembic
+      - ./services/alembic.ini:/app/alembic.ini
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    image: node:20-alpine
+    working_dir: /app
+    command: sh -c "npm install --no-audit --no-fund && npm run dev"
+    environment:
+      DEV_PROXY: http://services:8000
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    volumes:
+      - ./frontend:/app
+      - frontend-node-modules:/app/node_modules
+    depends_on:
+      - services
+
+volumes:
+  postgres-data:
+  frontend-node-modules:

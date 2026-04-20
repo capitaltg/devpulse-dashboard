@@ -1,0 +1,33 @@
+DevPulse has been deployed as release "{{ .Release.Name }}" into namespace "{{ .Release.Namespace }}".
+
+{{- if not .Values.auth.provider }}
+
+⚠  auth.provider is not set. The backend will return 503 on /v1/config and the
+   UI will show a config-error page until you set one of:
+     --set auth.provider=github       (plus auth.github.clientId / secret)
+     --set auth.provider=oidc         (plus auth.oidc.issuer / clientId)
+{{- end }}
+
+{{- if .Values.ingress.enabled }}
+
+The ingress is at {{ if .Values.ingress.tls.enabled }}https{{ else }}http{{ end }}://{{ .Values.ingress.host }}
+  — routes /, /v1/*, and /auth/* through the same hostname so cookies and
+    same-origin requests Just Work.
+{{- else }}
+
+Ingress is disabled. To reach the UI, either:
+  - port-forward the frontend service:
+      kubectl --namespace {{ .Release.Namespace }} port-forward svc/{{ include "devpulse.frontend.fullname" . }} 3000:80
+    (note: API calls will fail until you front both services with an ingress
+     or reverse proxy on a single origin; see docs/getting-started.md)
+  - or re-install with ingress.enabled=true and ingress.host set.
+{{- end }}
+
+{{- if and (eq .Values.auth.provider "github") (not (include "devpulse.frontendBaseUrl" .)) }}
+
+⚠  AUTH_PROVIDER=github requires a FRONTEND_BASE_URL. Set either:
+     --set auth.frontendBaseUrl=https://your-host
+   or enable ingress with a host and it'll be derived automatically.
+{{- end }}
+
+Run `kubectl --namespace {{ .Release.Namespace }} get pods -l app.kubernetes.io/instance={{ .Release.Name }}` to check pod status.
