@@ -59,13 +59,12 @@
     "react-markdown": "^10.1.0",
     "react-oidc-context": "^3.3.0",
     "react-resizable-panels": "^2.1.9",
-    "react-router-dom": "^6.30.3",
+    "react-router-dom": "^7.18.4",
     "recharts": "^2.15.4",
     "rehype-raw": "^7.0.0",
     "remark-gfm": "^4.0.1",
     "sonner": "^1.7.4",
     "tailwind-merge": "^2.6.1",
-    "tailwindcss-animate": "^1.0.7",
     "vaul": "^0.9.9",
     "zod": "^3.25.76"
   },
@@ -87,9 +86,10 @@
     "postcss": "^8.5.8",
     "rollup-plugin-visualizer": "^7.0.1",
     "tailwindcss": "^3.4.19",
+    "tailwindcss-animate": "^1.0.7",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.56.1",
-    "vite": "^5.4.21",
-    "vitest": "^3.2.4"
+    "vite": "^7.3.7",
+    "vitest": "^4.1.11"
   }
 }
